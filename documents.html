@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文档</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-select.min.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/navbar.css">
+    <style>
+        .main-div li {
+            margin-top: 10px;
+        }
+        .main-div a:hover {
+            color: lightblue;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="navbar navbar-fixed-top">
+        <div class="container">
+            <!-- Collapsed navigation -->
+            <div class="navbar-header">
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <!-- Main title -->
+                <a class="navbar-brand" href="meter.html">云服务评分</a>
+            </div>
+            <!-- Expanded navigation -->
+            <div class="navbar-collapse collapse">
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                    <li class="active">
+                        <a href="index.html">Home</a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="documents.html">文档</a>
+                    </li>
+                    <li>
+                        <a href="bench.html">云服务评测</a>
+                    </li>
+                    <li>
+                        <a href="ml.html">机器学习推荐</a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">About <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="#">Contact</a>
+                            </li>
+                            <li>
+                                <a href="#">Contributing</a>
+                            </li>
+                            <li>
+                                <a href="#">Team</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                <!-- Search, Navigation and Repo links -->
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="#" data-toggle="modal" data-target="#">
+                            <i class="fa fa-search"></i> Search
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fa fa-github"></i>
+                            GitHub
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div style="margin-top: 50px; margin-left: 150px; margin-right: 100px;">
+        <img src="img/cloud.jpeg" style="width: 150px;">
+        <scan style="font-size: 22px; font-weight: bold; margin-left: 20px;"> 文 档</scan>
+        <img src="img/zhsh.jpg" style="float: right; width: 350px;">
+        <div class="main-div" style="font-size: 17px;">
+            <ul>
+                <li style="margin-top: 30px;"><a href="scorerule.html">性能评测及评分规则</a></li>
+                <li><a href="benchreport1.html">第一次全面评测报告</a></li>
+            </ul>
+        </div>
+        <div style="font-size: 17px; margin-left: 40px; margin-top: 70px;">共三条， 当前第 1 页</div>
+    </div>
+    <footer style="margin-bottom: 5px;">
+        <hr>
+        <center>&#169; Unias Team, SEI, PKU</center>
+        <center>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</center>
+    </footer>
+</body>
+
+</html>

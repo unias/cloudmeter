@@ -1,0 +1,22 @@
+body {
+    padding-top: 70px;
+}
+
+.navbar {
+    background-color: rgb(43, 51, 68);
+    height: 60px;
+}
+
+.navbar a {
+    color: white;
+    font-size: 17px;
+    margin-top: 5px;
+}
+
+.navbar a:hover {
+    color: #8bdbb3;
+}
+
+.jumbotron {
+    background-color: rgb(227, 235, 235);
+}

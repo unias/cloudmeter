@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=">
+    <title>云服务评分</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/bootstrap-select.min.css">
+    <link rel="stylesheet" href="css/navbar.css">
+    <style>
+        th {
+            text-align: center;
+            font-size: 15px;
+        }
+
+        .thc {
+            background-color: rgb(240, 239, 239);
+            border-radius: 5px;
+            border: gray 1px solid;
+        }
+
+        .block {
+            width: 70px;
+            height: 40px;
+            line-height: 40px;
+            margin: 0 auto;
+            margin-top: 5px;
+            border-radius: 5px;
+        }
+
+        td img {
+            height: 40px;
+            width: 80px;
+        }
+
+        table a:hover {
+            text-decoration: none;
+            cursor: pointer;
+            color: orange;
+        }
+
+        .media-body {
+            text-align: left;
+        }
+
+        .media-body a {
+            font-size: 16px;
+        }
+
+        .media-body p {
+            color: gray;
+        }
+
+        input {
+            height: 40px;
+            size: 20px;
+        }
+
+        #chart1 {
+            height: 800px;
+            width: 90%;
+            margin: 0 auto;
+            margin-top: 30px;
+        }
+
+        #charts .media-left img {
+            height: 40px;
+        }
+
+        #charts1,
+        #charts2,
+        #charts3 {
+            height: 500px;
+            width: 80%;
+            margin: 0 auto;
+            margin-top: 30px;
+        }
+    </style>
+    <script src="js/jquery-1.9.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/echarts.min.js"></script>
+    <script src="js/bootstrap-select.min.js"></script>
+    <script src="js/defaults-zh_CN.min.js"></script>
+    <script src="js/vue.min.js"></script>
+    <script>
+        function drawBarchart(instanceIds, datas) {
+            option = {
+                title: {
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                        type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                    }
+                },
+                legend: {
+                    data: ['启动时间（ms）', 'cpu性能分数', '内存性能分数', '磁盘性能分数', '网络性能分数'],
+                    top: '30px'
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'value'
+                },
+                yAxis: {
+                    type: 'category',
+                    data: instanceIds
+                },
+                series: [
+                    {
+                        name: '启动时间（ms）',
+                        type: 'bar',
+                        stack: '总量',
+                        barWidth: '55%',
+                        label: {
+                            normal: {
+                                show: true,
+                                position: 'insideRight'
+                            }
+                        },
+                        data: datas[0]
+                    },
+                    {
+                        name: 'cpu性能分数',
+                        type: 'bar',
+                        stack: '总量',
+                        label: {
+                            normal: {
+                                show: true,
+                                position: 'insideRight'
+                            }
+                        },
+                        data: datas[1]
+                    },
+                    {
+                        name: '内存性能分数',
+                        type: 'bar',
+                        stack: '总量',
+                        label: {
+                            normal: {
+                                show: true,
+                                position: 'insideRight'
+                            }
+                        },
+                        data: datas[2]
+                    },
+                    {
+                        name: '磁盘性能分数',
+                        type: 'bar',
+                        stack: '总量',
+                        label: {
+                            normal: {
+                                show: true,
+                                position: 'insideRight'
+                            }
+                        },
+                        data: datas[3]
+                    },
+                    {
+                        name: '网络性能分数',
+                        type: 'bar',
+                        stack: '总量',
+                        label: {
+                            normal: {
+                                show: true,
+                                position: 'insideRight'
+                            }
+                        },
+                        data: datas[4]
+                    }
+                ]
+            };
+            var myChart = echarts.init(document.getElementById('chart1'));
+
+            //使用制定的配置项和数据显示图表
+            myChart.setOption(option);
+            $(window).resize(myChart.resize);
+        }
+        var alldata = [];
+        $.ajax({
+            url: "json/meters.json", //json文件位置
+            type: "GET", //请求方式为get
+            dataType: "json", //返回数据格式为json
+            success: function (data) { //请求成功完成后要执行的方法 
+                alldata = data;
+                let select = document.getElementsByTagName("select")[0];
+                data.forEach(function (value, index) {
+                    if (index == 0) {
+                        select.innerHTML += "<option selected=\"selected\" value=\"" + value.date + "\">" + value.date + "</option>";
+                    } else {
+                        select.innerHTML += "<option value=\"" + value.date + "\">" + value.date + "</option>";
+                    }
+                })
+                let items = data[0].datas;
+                let thetable = document.getElementsByTagName("tbody")[0];
+                items.forEach(function (item) {
+                    let tr = document.createElement("tr");
+                    let td = document.createElement("td");
+                    td.innerHTML = "<input type=\"checkbox\" id=\"check\" value=\"" + item.instanceId + "\">";
+                    tr.appendChild(td);
+                    td = document.createElement("td");
+                    let picname;
+                    if (item.factory == "阿里云") {
+                        picname = "ali.png";
+                    } else if (item.factory == "腾讯云") {
+                        picname = "ten.png";
+                    } else if (item.factory == "华为云") {
+                        picname = "hua.png";
+                    } else {
+                        picname = "ucl.png";
+                    }
+                    td.innerHTML = "<div class=\"media\" style=\"margin-top: 5px; height: 45px;\">\
+                            <div class=\"media-left\"><img src=img/" + picname + "></div>\
+                            <div class=\"media-body\">\
+                                <a class=\"media-heading\" href=\"#charts\" onclick=\"drawcharts(this)\">"
+                        + item.instanceId + "</a><p>" + item.config + "</p>\
+                            </div>\
+                        </div>";
+                    tr.appendChild(td);
+                    td = document.createElement("td");
+                    td.innerHTML = "<div class=\"block\">" + item.region + "</div>";
+                    tr.appendChild(td);
+                    td = document.createElement("td");
+                    td.innerHTML = "<div class=\"block\">" + item.open + "</div>";
+                    tr.appendChild(td);
+                    td = document.createElement("td");
+                    td.innerHTML = "<div class=\"block\">" + item.cpu + "</div>";
+                    tr.appendChild(td);
+                    td = document.createElement("td");
+                    td.innerHTML = "<div class=\"block\">" + item.memory + "</div>";
+                    tr.appendChild(td);
+                    td = document.createElement("td");
+                    td.innerHTML = "<div class=\"block\">" + item.io + "</div>";
+                    tr.appendChild(td);
+                    td = document.createElement("td");
+                    td.innerHTML = "<div class=\"block\">" + item.network + "</div>";
+                    tr.appendChild(td);
+                    td = document.createElement("td");
+                    td.innerHTML = "<div class=\"block\">" + item.total + "</div>";
+                    tr.appendChild(td);
+                    thetable.appendChild(tr);
+                });
+
+                let instanceIds = [];
+                items.forEach(function (item) {
+                    instanceIds.push([item.factory + '\n' + item.instanceId, item.total]);
+                });
+                instanceIds.sort(function (a, b) {
+                    return b[1] - a[1];
+                });
+                for (let i = 0; i < instanceIds.length; i++) {
+                    instanceIds[i] = instanceIds[i][0];
+                }
+                instanceIds = instanceIds.reverse();
+                let datas = [[], [], [], [], []];
+                instanceIds.forEach(function (id) {
+                    items.every(function (item) {
+                        if (item.instanceId == id.split('\n')[1]) {
+                            datas[0].push(parseFloat(item.open.substring(0, 4)));
+                            datas[1].push(item.cpu);
+                            datas[2].push(item.memory);
+                            datas[3].push(item.io);
+                            datas[4].push(item.memory);
+                            return false;
+                        }
+                        return true;
+                    })
+                });
+                drawBarchart(instanceIds, datas);
+            }
+        })
+        function confirm() {
+            let n = $("#check:checked").length;
+            if (n >= 2) {
+                return true;
+            }
+            else {
+                alert("请选择至少两个实例进行对比！");
+                return false;
+            }
+        }
+        function compare() {
+            let checked = $("#check:checked");
+            if (confirm()) {
+                let uri = "meter-compare.html?";
+                for (let i = 0; i < checked.length; i++) {
+                    uri = uri + "instanceId" + i.toString() + "=" + checked[i].value + "&";
+                }
+                window.location.href = encodeURI(uri.substring(0, uri.length - 1));
+            }
+        }
+        function changeChart(obj) {
+            $("#charts").hide();
+            let index = obj.selectedIndex;
+            let blocks = document.getElementsByClassName("block");
+            let i = 0;
+            alldata[index].datas.forEach(function (item) {
+                blocks[i++].innerHTML = item.region;
+                blocks[i++].innerHTML = item.open;
+                blocks[i++].innerHTML = item.cpu;
+                blocks[i++].innerHTML = item.memory;
+                blocks[i++].innerHTML = item.io;
+                blocks[i++].innerHTML = item.network;
+                blocks[i++].innerHTML = item.total;
+            });
+            let instanceIds = [];
+            alldata[index].datas.forEach(function (item) {
+                instanceIds.push([item.factory + '\n' + item.instanceId, item.total]);
+            });
+            instanceIds.sort(function (a, b) {
+                return b[1] - a[1];
+            });
+            for (let i = 0; i < instanceIds.length; i++) {
+                instanceIds[i] = instanceIds[i][0];
+            }
+            instanceIds = instanceIds.reverse();
+            let datas = [[], [], [], [], []];
+            instanceIds.forEach(function (id) {
+                alldata[index].datas.every(function (item) {
+                    if (item.instanceId == id.split('\n')[1]) {
+                        datas[0].push(parseFloat(item.open.substring(0, 4)));
+                        datas[1].push(item.cpu);
+                        datas[2].push(item.memory);
+                        datas[3].push(item.io);
+                        datas[4].push(item.memory);
+                        return false;
+                    }
+                    return true;
+                })
+            });
+            drawBarchart(instanceIds, datas);
+        }
+        function drawcharts(obj) {
+            let drawLinechart = function (date, datas) {
+                let option = {
+                    title: {
+                        text: '实例性能随时间变化图',
+                        left: '33%'
+                    },
+                    tooltip: {},
+                    legend: {
+                        data: ['时间']
+                    },
+                    xAxis: {
+                        data: date
+                    },
+                    yAxis: {
+                    },
+                    series: [{
+                        name: '性能分数',
+                        type: 'line',
+                        data: datas
+                    }]
+                };
+                //初始化echarts实例
+                let myChart = echarts.init($("#charts1")[0]);
+                //使用制定的配置项和数据显示图表
+                myChart.setOption(option);
+                $(window).resize(myChart.resize);
+            }
+            let drawBarchart = function (region, datas) {
+                var option = {
+                    title: {
+                        text: '实例不同地域性能对比',
+                        left: '33%'
+                    },
+                    color: ['#3398DB'],
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                            type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                        }
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    xAxis: [
+                        {
+                            type: 'category',
+                            data: region,
+                            axisTick: {
+                                alignWithLabel: true
+                            }
+                        }
+                    ],
+                    yAxis: [
+                        {
+                            type: 'value'
+                        }
+                    ],
+                    series: [
+                        {
+                            name: '性能分数',
+                            type: 'bar',
+                            barWidth: '30%',
+                            data: datas
+                        }
+                    ]
+                };
+                //初始化echarts实例
+                var myChart = echarts.init($("#charts2")[0]);
+
+                //使用制定的配置项和数据显示图表
+                myChart.setOption(option);
+                $(window).resize(myChart.resize);
+            }
+            let drawRadar = function (datas) {
+                var option = {
+                    title: {
+                        text: '实例各类指标性能',
+                        left: '36%'
+                    },
+                    tooltip: {},
+                    legend: {
+                        data: '实例性能'
+                    },
+                    radar: {
+                        // shape: 'circle',
+                        name: {
+                            textStyle: {
+                                color: '#fff',
+                                backgroundColor: '#999',
+                                borderRadius: 3,
+                                padding: [3, 5]
+                            }
+                        },
+                        indicator: [
+                            { name: '总分数', max: 600 },
+                            { name: '启动时间（ms）', max: 15 },
+                            { name: 'CPU性能分数', max: 150 },
+                            { name: '内存性能分数', max: 150 },
+                            { name: '磁盘性能分数', max: 150 },
+                            { name: '网络性能分数', max: 150 }
+                        ]
+                    },
+                    series: [{
+                        name: '实例性能',
+                        type: 'radar',
+                        // areaStyle: {normal: {}},
+                        data: [{
+                            value: datas,
+                            name: '实例性能'
+                        }]
+                    }]
+                };
+                //初始化echarts实例
+                var myChart = echarts.init($("#charts3")[0]);
+
+                //使用制定的配置项和数据显示图表
+                myChart.setOption(option);
+                $(window).resize(myChart.resize);
+            }
+            let index = $("select")[0].selectedIndex;
+            let instanceId = obj.innerHTML;
+            let datas = [];
+            alldata.forEach(function (item) {
+                let now = {};
+                now["date"] = item.date;
+                item.datas.forEach(function (t) {
+                    if (t.instanceId == instanceId) {
+                        now = Object.assign(now, t);
+                    }
+                });
+                datas.push(now);
+            });
+            $("#charts").show();
+            let img = $("#charts").find(".media-left")[0];
+            console.log(img);
+            if (datas[0].factory == "阿里云") {
+                img.innerHTML = "<img src=\"img/ali.png\">";
+            } else if (datas[0].factory == "腾讯云") {
+                img.innerHTML = "<img src=\"img/ten.png\">";
+            } else if (datas[0].factory == "华为云") {
+                img.innerHTML = "<img src=\"img/hua.png\">";
+            } else {
+                img.innerHTML = "<img src=\"img/ucl.png\">";
+            }
+            $("#charts").find(".media-heading")[0].innerHTML = instanceId;
+            $("#charts").find("#media-body-text")[0].innerHTML = datas[0].config;
+            let param1 = [], param2 = [];
+            datas.forEach(function (value) {
+                param1.push(value.date);
+                param2.push(value.total);
+            });
+            drawLinechart(param1.reverse(), param2.reverse());
+
+            param1 = []; param2 = [];
+            for (let i = 0; i < 4 && i < datas.length; i++) {
+                param1.push(datas[i].region);
+                param2.push(datas[i].total);
+            }
+            drawBarchart(param1.reverse(), param2.reverse());
+
+            param1 = [];
+            param1.push(datas[index].total, parseFloat(datas[index].open.substr(0, datas[index].open.length-1)), datas[index].cpu,
+                datas[index].memory, datas[index].io, datas[index].network);
+            drawRadar(param1);
+        }
+    </script>
+</head>
+
+<body>
+    <div class="navbar navbar-fixed-top">
+        <div class="container">
+            <!-- Collapsed navigation -->
+            <div class="navbar-header">
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <!-- Main title -->
+                <a class="navbar-brand" href="index.html">云服务推荐</a>
+            </div>
+            <!-- Expanded navigation -->
+            <div class="navbar-collapse collapse">
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                    <li class="active">
+                        <a href="index.html">Home</a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="documents.html">评分规则</a>
+                    </li>
+                    <li>
+                        <a href="bench.html">云服务评测</a>
+                    </li>
+                    <li>
+                        <a href="ml.html">机器学习推荐</a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">About <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="#">Contact</a>
+                            </li>
+                            <li>
+                                <a href="#">Contributing</a>
+                            </li>
+                            <li>
+                                <a href="#">Team</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                <!-- Search, Navigation and Repo links -->
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="#" data-toggle="modal" data-target="#">
+                            <i class="fa fa-search"></i> Search
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fa fa-github"></i>
+                            GitHub
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="jumbotron">
+            <div class="container">
+                <h1>云服务评分</h1>
+                <p>对阿里云、腾讯云、华为云、uCloud上多种常用实例类型进行评测。</p>
+                <p><a class="btn btn-primary btn-lg" role="button">
+                        学习更多</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <span style="margin-left: 20px; font-size: 17px; margin-right: 10px;">评测时间：</span>
+        <select id="time" class="selectpicker" data-actions-box="true" onchange="changeChart(this)">
+        </select>
+        <div class="table-responsive" style="margin-top: 20px">
+            <table class="table table-hover text-center">
+                <thead>
+                    <tr>
+                        <th><button onclick="compare()" type="submit" class="btn btn-primary"
+                                style="margin-bottom: -8px;">比较</button></th>
+                        <th>实例类型</th>
+                        <th class="thc">地域</th>
+                        <th class="thc">启动时间</th>
+                        <th class="thc">CPU性能</th>
+                        <th class="thc">内存性能</th>
+                        <th class="thc">磁盘性能</th>
+                        <th class="thc">网络性能</th>
+                        <th class="thc">总评分</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <div class="container">
+        <div id="charts">
+            <button type="button" onclick="$('#charts').hide()" class="close pull-right">
+                <span aria-hidden="true">x</span>
+                <span class="sr-only">关闭</span>
+            </button>
+            <div class="container">
+                <div class="media">
+                    <div class="media-left"></div>
+                    <div class="media-body">
+                        <h4 class="media-heading"></h4>
+                        <p id="media-body-text"></p>
+                    </div>
+                </div>
+            </div>
+            <div id="charts1"></div>
+            <div id="charts2"></div>
+            <div id="charts3"></div>
+        </div>
+        <script>$("#charts").hide()</script>
+
+        <div id="chart1"></div>
+    </div>
+ 
+    <footer style="margin-bottom: 5px;">
+        <hr>
+        <center>&#169; Unias Team, SEI, PKU</center>
+        <center>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</center>
+    </footer>
+</body>
+
+</html>

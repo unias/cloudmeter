@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=">
+    <title>云服务评测</title>
+
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-table.css">
+    <link rel="stylesheet" href="css/bootstrap-select.min.css">
+    <link rel="stylesheet" href="css/navbar.css">
+    <style>
+        .bootstrap-select {
+            margin: 10px 20px;
+        }
+
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+        }
+
+        .axis text {
+            font-family: sans-serif;
+            font-size: 11px;
+        }
+
+        hr {
+            border: solid gray 0.5px;
+        }
+    </style>
+    <script src="js/jquery-1.9.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/bootstrap-table.js"></script>
+    <script src="js/bootstrap-select.min.js"></script>
+    <script src="js/defaults-zh_CN.min.js"></script>
+    <script src="js/d3.v3.min.js" charset="utf-8"></script>
+</head>
+
+<body>
+    <!-- 导航 -->
+    <div class="navbar navbar-fixed-top">
+        <div class="container">
+            <!-- Collapsed navigation -->
+            <div class="navbar-header">
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <!-- Main title -->
+                <a class="navbar-brand" href="meter.html">云服务评分</a>
+            </div>
+            <!-- Expanded navigation -->
+            <div class="navbar-collapse collapse">
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                    <li class="active">
+                        <a href="index.html">Home</a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="documents.html">文档</a>
+                    </li>
+                    <li>
+                        <a href="bench.html">云服务评测</a>
+                    </li>
+                    <li>
+                        <a href="ml.html">机器学习推荐</a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">About <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="#">Contact</a>
+                            </li>
+                            <li>
+                                <a href="#">Contributing</a>
+                            </li>
+                            <li>
+                                <a href="#">Team</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                <!-- Search, Navigation and Repo links -->
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="#" data-toggle="modal" data-target="#">
+                            <i class="fa fa-search"></i> Search
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fa fa-github"></i>
+                            GitHub
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="jumbotron">
+            <div class="container">
+                <h1>机器学习推荐</h1>
+                <p>针对您的需求推荐最适合的云服务器。</p>
+                <p><a class="btn btn-primary btn-lg" role="button">
+                        学习更多</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>训练数据集</h2>
+        <p>我们在阿里云、华为云、腾讯云、UCloud四家厂商中常用的实例上运行Hadoop和Spark应用程序来获取大量的性能数据。Hadoop和Spark工作负载提取自HiBench和spark-perf。</p>
+        <p>具体情况及数据集见：https://github.com/jind5182/scout-CH</p>
+        <p>我们通过得到的数据集进行训练得到一个模型。</p>
+        <p>您可以在我们支持的实例集合中选取几个实例，使用您自己的程序在这几个实例上运行，收集运行过程中的性能数据。并将收集到的数据提交给我们，我们将反馈对于你的程序最适合的实例。</p>
+        <button class="btn btn-primary btn-lg" role="button" onclick="$('#file1').toggle()">提交您的性能数据</button>
+        <form class="form-horizontal" role="form" action="#" method="post" style="margin-top: 20px;" id="file1">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">性能数据：</label>
+                <div class="col-sm-3">
+                    <input class="form-control" name="" type="file" value="">
+                </div>
+            </div>
+            <input class="btn btn-primary" type="submit"></input><span style="margin-left: 20px;">注意：数据格式具体见提供的GitHub</span>
+        </form>
+        <script>$("#file1").hide()</script>
+
+        
+    </div>
+
+    <footer style="margin-bottom: 5px;">
+        <hr>
+        <center>&#169; Unias Team, SEI, PKU</center>
+        <center>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</center>
+    </footer>
+</body>
+
+</html>

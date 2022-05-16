@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>比较</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-select.min.css">
+    <link rel="stylesheet" href="css/navbar.css">
+    <style>
+        .media-left img {
+            height: 60px;
+        }
+
+        .media-body {
+            padding-left: 25px;
+        }
+
+        .media-body p {
+            font-size: 18px;
+            color: gray;
+            margin-top: 10px;
+        }
+
+        .media-heading {
+            margin-top: 10px;
+            font-size: 20px;
+        }
+
+        #chart1 {
+            height: 600px;
+            width: 80%;
+            margin: 0 auto;
+            margin-top: 30px;
+        }
+
+        #chart2 {
+            height: 500px;
+            width: 80%;
+            margin: 0 auto;
+            margin-top: 30px;
+        }
+    </style>
+    <script src="js/jquery-1.9.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/echarts.min.js"></script>
+    <script src="js/bootstrap-select.min.js"></script>
+    <script src="js/defaults-zh_CN.min.js"></script>
+    <script>
+        var getParam = function () {
+            /**
+            * 获取参数的键值对对象。
+            */
+            try {
+                let url = window.location.href;
+                let result = url.split("?")[1];
+                let keyValue = result.split("&");
+                let obj = [];
+                for (let i = 0; i < keyValue.length; i++) {
+                    obj.push(decodeURI(keyValue[i].split("=")[1]));
+                }
+                return obj;
+            } catch (e) {
+                console.warn("There has no param value!");
+            }
+        };
+        function drawLinechart(date, datas) {
+            let data = [], t = datass[0].length;
+            for (let i = 0; i < datas.length; i += t) {
+                let tmp = {};
+                tmp.name = names[Math.floor(i / t)];
+                tmp.data = datas.slice(i, i + t);
+                tmp.type = 'line';
+                data.push(tmp);
+            }
+            console.log(data);
+            let option = {
+                title: {
+                    text: '实例性能随时间变化图',
+                    left: '33%'
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: names,
+                    top: '30px'
+                },
+                xAxis: {
+                    data: date
+                },
+                yAxis: {
+                },
+                series: data
+            };
+            //初始化echarts实例
+            let myChart = echarts.init(document.getElementById('chart2'));
+            //使用制定的配置项和数据显示图表
+            myChart.setOption(option);
+            $(window).resize(myChart.resize);
+        }
+        function drawRadar(datas) {
+            let data = [];
+            for (let i = 0; i < datas.length; i += 6) {
+                let tmp = {};
+                tmp.name = names[Math.floor(i / 6)];
+                tmp.value = datas.slice(i, i + 6);
+                data.push(tmp);
+            }
+            var option = {
+                title: {
+                    text: '实例各类指标性能',
+                    left: '36%'
+                },
+                tooltip: {
+                },
+                legend: {
+                    data: names,
+                    top: '30px'
+                },
+                radar: {
+                    // shape: 'circle',
+                    name: {
+                        textStyle: {
+                            color: '#fff',
+                            backgroundColor: '#999',
+                            borderRadius: 3,
+                            padding: [3, 5]
+                        }
+                    },
+                    indicator: [
+                        { name: '总分数', max: 600 },
+                        { name: '启动时间（ms）', max: 15 },
+                        { name: 'CPU性能分数', max: 150 },
+                        { name: '内存性能分数', max: 150 },
+                        { name: '磁盘性能分数', max: 150 },
+                        { name: '网络性能分数', max: 150 }
+                    ],
+                    radius: 200
+                },
+                series: [{
+                    name: '实例性能',
+                    type: 'radar',
+                    // areaStyle: {normal: {}},
+                    data: data
+                }]
+            };
+            //初始化echarts实例
+            var myChart = echarts.init(document.getElementById('chart1'));
+
+            //使用制定的配置项和数据显示图表
+            myChart.setOption(option);
+            $(window).resize(myChart.resize);
+        }
+
+        var instanceIds = getParam();
+        var names = [];
+        var datass = [];
+        $.ajax({
+            url: "json/meters.json", //json文件位置
+            type: "GET", //请求方式为get
+            dataType: "json", //返回数据格式为json
+            success: function (data) {
+                let select = document.getElementsByTagName("select")[0];
+                data.forEach(function (value, index) {
+                    if (index == 0) {
+                        select.innerHTML += "<option selected=\"selected\" value=\"" + value.date + "\">" + value.date + "</option>";
+                    } else {
+                        select.innerHTML += "<option value=\"" + value.date + "\">" + value.date + "</option>";
+                    }
+                });
+                data.forEach(function (item) {
+                    item.datas.forEach(function (t) {
+                        for (let i = 0; i < instanceIds.length; i++) {
+                            if (t.instanceId == instanceIds[i]) {
+                                let now = {};
+                                now["date"] = item.date;
+                                now = Object.assign(now, t);
+                                if (datass[i]) {
+                                    datass[i].push(now);
+                                } else {
+                                    datass[i] = [];
+                                    names[i] = t.factory + instanceIds[i];
+                                    datass[i].push(now);
+                                }
+                                break;
+                            }
+                        }
+                    });
+                });
+
+                for (let i = 0; i < datass.length; i++) {
+                    document.getElementById("instances").innerHTML += '<td>'
+                        + '<div class="media">'
+                        + '<div class="media-left"></div>'
+                        + '<div class="media-body">'
+                        + '<h4 class="media-heading"></h4>'
+                        + '<p class="media-body-text"></p>'
+                        + '</div>'
+                        + '</div>'
+                        + '</td>';
+                    let img = document.getElementsByClassName("media-left")[i];
+                    if (datass[i][0].factory == "阿里云") {
+                        img.innerHTML = "<img src=\"img/ali.png\">";
+                    } else if (datass[i][0].factory == "腾讯云") {
+                        img.innerHTML = "<img src=\"img/ten.png\">";
+                    } else {
+                        img.innerHTML = "<img src=\"img/ucl.png\">";
+                    }
+                    let mediaheading = document.getElementsByClassName("media-heading")[i];
+                    mediaheading.innerHTML = instanceIds[i];
+                    let mediatext = document.getElementsByClassName("media-body-text")[i];
+                    mediatext.innerHTML = datass[i][0].config;
+                }
+
+                let param1 = [], param2 = [];
+                datass[0].forEach(function (value) {
+                    param1.push(value.date);
+                });
+                datass.forEach(function (datas) {
+                    let tmp = []
+                    datas.forEach(function (value) {
+                        tmp.push(value.total);
+                    });
+                    param2.push(...tmp.reverse())
+                });
+                drawLinechart(param1.reverse(), param2);
+
+                param1 = [];
+                for (let i = 0; i < datass.length; i++) {
+                    param1.push(datass[i][0].total, parseFloat(datass[i][0].open.substr(0,datass[i][0].open.length-1)), datass[i][0].cpu,
+                        datass[i][0].memory, datass[i][0].io, datass[i][0].network);
+                }
+                drawRadar(param1);
+            }
+        });
+
+        function changeChart(obj) {
+            let index = obj.selectedIndex;
+            let param1 = [];
+            for (let i = 0; i < datass.length; i++) {
+                param1.push(datass[i][index].total, parseFloat(datass[i][0].open.substr(0,datass[i][0].open.length-1)), datass[i][index].cpu,
+                    datass[i][index].memory, datass[i][index].io, datass[i][index].network);
+            }
+            drawRadar(param1);
+        }
+    </script>
+</head>
+
+<body>
+    <div class="navbar navbar-fixed-top">
+        <div class="container">
+            <!-- Collapsed navigation -->
+            <div class="navbar-header">
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <!-- Main title -->
+                <a class="navbar-brand" href="index.html">云服务推荐</a>
+            </div>
+            <!-- Expanded navigation -->
+            <div class="navbar-collapse collapse">
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                    <li class="active">
+                        <a href="index.html">Home</a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="documents.html">评分规则</a>
+                    </li>
+                    <li>
+                        <a href="bench.html">云服务评测</a>
+                    </li>
+                    <li>
+                        <a href="ml.html">机器学习推荐</a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">About <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="#">Contact</a>
+                            </li>
+                            <li>
+                                <a href="#">Contributing</a>
+                            </li>
+                            <li>
+                                <a href="#">Team</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                <!-- Search, Navigation and Repo links -->
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="#" data-toggle="modal" data-target="#">
+                            <i class="fa fa-search"></i> Search
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fa fa-github"></i>
+                            GitHub
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="container table-responsive">
+        <table class="table">
+            <tr id="instances">
+            </tr>
+        </table>
+    </div>
+
+    <div class="container" style="margin-top: 20px;">
+        <span style="font-size: 17px; margin-right: 10px;">评测时间：</span>
+        <select id="time" class="selectpicker" data-actions-box="true" onchange="changeChart(this)">
+        </select>
+        <div id="chart1"></div>
+        <div id="chart2"></div>
+    </div>
+<!--modal-->
+<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    ×
+                </button>
+                <h4 class="modal-title" id="myModalLabel">机器学习推荐</h4>
+            </div>
+            <div class="modal-body">
+                <form role="form" action="javascript:void(0)">
+                    <span style="margin-left: 20px">任务程序：</span>
+                    <input id="file" type="file" class="form-control"
+                        style="width: 220px; display: inline-block; margin-top: 10px; margin-bottom: 10px">
+                    <br />
+                    <span style="margin-left: 20px; margin-right: 13px">执行命令：</span>
+                    <input id="command" type="text" class="form-control"
+                        style="width: 220px; display: inline-block; margin-top: 10px; margin-bottom: 10px">
+                    <br />
+                    <span style="margin-left: 20px; margin-right: 13px">实例规格：</span>
+                    <select id="kind" class="selectpicker" data-size="6" multiple data-actions-box="true">
+                        <option value="ecs.g5.large">ecs.g5.large</option>
+                        <option value="ecs.g5.xlarge">ecs.g5.xlarge</option>
+                        <option value="ecs.g5.2xlarge">ecs.g5.2xlarge</option>
+                        <option value="ecs.g5.3xlarge">ecs.g5.3xlarge</option>
+                        <option value="ecs.c5.large">ecs.c5.large</option>
+                        <option value="ecs.c5.xlarge">ecs.c5.xlarge</option>
+                        <option value="ecs.c5.2xlarge">ecs.c5.2xlarge</option>
+                        <option value="ecs.c5.3xlarge">ecs.c5.3xlarge</option>
+                        <option value="ecs.r5.large">ecs.r5.large</option>
+                        <option value="ecs.r5.xlarge">ecs.r5.xlarge</option>
+                        <option value="ecs.r5.2xlarge">ecs.r5.2xlarge</option>
+                        <option value="ecs.r5.3xlarge">ecs.r5.3xlarge</option>
+                        <option value="ecs.d1ne.2xlarge">ecs.d1ne.2xlarge</option>
+                        <option value="ecs.i2g.2xlarge">ecs.i2g.2xlarge</option>
+                        <option value="ecs.i2.xlarge">ecs.i2.xlarge</option>
+                        <option value="ecs.i2.2xlarge">ecs.i2.2xlarge</option>
+                        <option value="ecs.hfg5.large">ecs.hfg5.large</option>
+                        <option value="ecs.hfg5.xlarge">ecs.hfg5.xlarge</option>
+                        <option value="ecs.hfg5.2xlarge">ecs.hfg5.2xlarge</option>
+                        <option value="ecs.hfg5.3xlarge">ecs.hfg5.3xlarge</option>
+                        <option value="ecs.hfc5.large">ecs.hfc5.large</option>
+                        <option value="ecs.hfc5.xlarge">ecs.hfc5.xlarge</option>
+                        <option value="ecs.hfc5.2xlarge">ecs.hfc5.2xlarge</option>
+                        <option value="ecs.hfc5.3xlarge">ecs.hfc5.3xlarge</option>
+                    </select>
+                    <br />
+                    <span style="margin-left: 20px; margin-right: 13px">性能成本目标：</span>
+                    <select id="supplier" class="selectpicker">
+                        <option value="1">性能最好</option>
+                        <option value="2">成本最低</option>
+                        <option value="3">其他</option>
+                    </select>
+                    <br />
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="addRecord"
+                    onclick="alert('请在我的评测中查看结果'); ">提交</button>
+            </div>
+        </div>
+    </div>
+</div>
+    <footer style="margin-bottom: 5px;">
+        <hr>
+        <center>&#169; Unias Team, SEI, PKU</center>
+        <center>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</center>
+    </footer>
+</body>
+
+</html>
